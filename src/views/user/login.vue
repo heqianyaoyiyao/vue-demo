@@ -46,6 +46,7 @@
           ...form
         })
         if (code === 200) {
+          ElMessage.success('登录成功')
           userStore().setAccessToken(data.token)
           userStore().setUserInfo(data.user)
           router.push({
