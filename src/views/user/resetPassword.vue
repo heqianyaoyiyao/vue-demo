@@ -1,112 +1,87 @@
 <template>
-  <div class="reset-password">
-    <h1>Reset Password</h1>
-    <form @submit.prevent="submitNewPassword">
-      <div>
-        <label for="newPassword">New Password:</label>
-        <input
-          type="password"
-          v-model="newPassword"
-          id="newPassword"
-          required
-        />
-      </div>
-      <div>
-        <label for="confirmPassword">Confirm Password:</label>
-        <input
-          type="password"
-          v-model="confirmPassword"
-          id="confirmPassword"
-          required
-        />
-      </div>
-      <button type="submit">Reset Password</button>
-    </form>
-    <p v-if="error">{{ error }}</p>
-    <p v-if="message">{{ message }}</p>
+  <div class="reset-password-container">
+    <div class="conatiner">
+      <el-form :model="form" class="form" label-width="80" ref="formRef" :rules="rules">
+        <el-form-item label="新密码" prop="newPassword">
+          <el-input v-model="form.newPassword" type="password" />
+        </el-form-item>
+        <el-form-item label="确认密码" prop="confirmPassword">
+          <el-input v-model="form.confirmPassword" type="password" />
+        </el-form-item>
+        <div class="button">
+          <el-button @click="resetPasswordHandler(formRef)" type="primary">重置密码</el-button>
+        </div>
+      </el-form>
+    </div>
   </div>
 </template>
 
-<script>
-import axios from 'axios';
-import { ref } from 'vue';
-import { useRoute } from 'vue-router';
+<script setup lang="ts">
+  import { useRoute,useRouter } from "vue-router"
+  import { resetPassword } from '@/service/api/user'
 
-export default {
-  name: 'ResetPassword',
-  setup() {
-    const route = useRoute();
-    const newPassword = ref('');
-    const confirmPassword = ref('');
-    const error = ref(null);
-    const message = ref(null);
+  const form = reactive({
+    newPassword: '',
+    confirmPassword: ''
+  })
+  const checkPassword = (rule: any, value: any, callback: any) => {
+    if (!value) {
+      return callback(new Error('请再次输入密码'))
+    } else if (value !== form.newPassword) {
+      return callback(new Error('密码不一致'))
+    } else {
+      callback()
+    }
+  }
+  const rules = {
+    newPassword: [
+      { required: true, message: '请输入密码', trigger: 'blur' },
+    ],
+    confirmPassword: [
+      { required: true, validator: checkPassword, trigger: 'change' }
+    ],
+  }
 
-    const submitNewPassword = async () => {
-      if (newPassword.value !== confirmPassword.value) {
-        error.value = 'Passwords do not match';
-        return;
-      }
+  const route = useRoute()
+  const router = useRouter()
 
-      try {
-        const token = route.params.token; // 从URL中获取重置密码的token
-        const response = await axios.post(`/user/resetPassword/${token}`, {
-          newPassword: newPassword.value,
-        });
-
-        message.value = response.data.message;
-      } catch (err) {
-        if (err.response) {
-          error.value = err.response.data.message;
-        } else {
-          error.value = 'An error occurred';
+  const token = route.params.token
+  const formRef = ref(null)
+  const resetPasswordHandler = async(formEl: any) => {
+    if (!formEl) return
+    await formEl.validate(async (valid: any, fields: any) => {
+      if(valid) {
+        const { code, data } = await resetPassword({
+          resetToken: token,
+          newPassword: form.newPassword
+        })
+        if (code === 200) {
+          ElMessage.success('重置密码成功')
+          router.push({
+            path: '/login'
+          })
         }
       }
-    };
+    })
+  }
 
-    return {
-      newPassword,
-      confirmPassword,
-      submitNewPassword,
-      error,
-      message,
-    };
-  },
-};
 </script>
 
-<style scoped>
-.reset-password {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-form div {
-  margin-bottom: 15px;
-}
-form label {
-  display: block;
-  margin-bottom: 5px;
-}
-form input {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-}
-form button {
-  padding: 10px 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-form button:hover {
-  background-color: #0056b3;
-}
-p {
-  margin-top: 10px;
-  color: red;
-}
+<style scoped lang="scss">
+  .reset-password-container {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .conatiner {
+      width: 400px;
+
+      .button {
+        display: flex;
+        justify-content: center;
+      }
+    }
+  }
 </style>
