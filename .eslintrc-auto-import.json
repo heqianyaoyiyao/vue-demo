@@ -1,6 +1,5 @@
 {
   "globals": {
-    "ElMessage": true,
     "Component": true,
     "ComponentPublicInstance": true,
     "ComputedRef": true,

@@ -11,6 +11,7 @@
         <div class="button">
           <el-button @click="loginHandler(formRef)" type="primary">登录</el-button>
           <el-button @click="resetPasswordHandler(formRef)">重置密码</el-button>
+          <el-button @click="registHandler(formRef)">注册</el-button>
         </div>
       </el-form>
     </div>
@@ -18,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-  import { login, getResetPasswordToken } from '@/service/api/user'
+  import { login, getResetPasswordToken, regist } from '@/service/api/user'
   import { useRouter } from 'vue-router'
   import { userStore } from '@/stores/modules/user'
 
@@ -68,6 +69,22 @@
           router.push({
             path: `/resetPassword/${data}`
           })
+        }
+      }
+    })
+  }
+
+  const registHandler = async(formEl: any) => {
+    if (!formEl) return
+    await formEl.validate(async (valid: any, fields: any) => {
+      if (valid) {
+        const { code, data } = await regist({
+          ...form
+        })
+        debugger
+        if (code === 200) {
+          ElMessage.success('注册成功, 请重新登录')
+          form.password = ''
         }
       }
     })
