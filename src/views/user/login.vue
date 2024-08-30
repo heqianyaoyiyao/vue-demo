@@ -81,7 +81,6 @@
         const { code, data } = await regist({
           ...form
         })
-        debugger
         if (code === 200) {
           ElMessage.success('注册成功, 请重新登录')
           form.password = ''
