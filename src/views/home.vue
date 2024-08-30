@@ -17,9 +17,8 @@
   }
   check()
 
-  const { VITE_BASE_URL, VITE_LOCAT_ADDRESS } = import.meta.env
-  console.log(import.meta.env)
-  const uploadUrl = VITE_BASE_URL + '/api/file/upload'
+  const { VITE_LOCAT_ADDRESS } = import.meta.env
+  const uploadUrl = '/api/file/upload'
   const picUrl = ref('')
   const uploadSuccess = (result: any) => {
     console.log(result)
